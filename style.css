@@ -1,14 +1,37 @@
+* {
+  position: relative;
+}
+
+@font-face {
+  font-family: 'Brutalita';
+  src: url('/Brutalita-Regular.woff2') format('woff2');
+}
+
+body {
+  touch-action: pan-y;
+  margin: 0;
+  padding: 0;
+}
+
 body,
+html,
 button {
-  font-family: poster-gothic-atf, sans-serif;
+  font-family: Brutalita, Courier, monospace, sans-serif;
+  letter-spacing: -1px;
   font-weight: 400;
   font-style: normal;
-  font-size: 32px;
+  font-size: 24px;
+}
+
+.app {
+  height: 100vh;
+  margin: 0;
+  padding: 16px 0 0;
 }
 
 h1 {
   font-weight: 400;
-  font-size: 48px;
+  font-size: 2rem;
   margin: 0;
   padding: 0;
   line-height: 50px;
@@ -23,6 +46,8 @@ h1 {
 
 a {
   color: #34495e;
+  text-decoration: none;
+  border-bottom: 2px solid #34495e;
 }
 a:hover {
   color: #000;
@@ -30,15 +55,18 @@ a:hover {
 }
 
 button {
+  text-transform: uppercase;
   appearance: none;
   -webkit-appearance: none;
-  text-transform: uppercase;
-  margin: 16px;
+  margin: 8px 16px;
   padding: 8px 16px;
   border: 3px solid #000;
   display: block;
   background: #ecf0f1;
   white-space: nowrap;
+  color: #000;
+  font-size: 1.25rem;
+  letter-spacing: -1.2px;
 }
 button:hover {
   cursor: pointer;
@@ -46,12 +74,8 @@ button:hover {
   color: #fff;
 }
 
-input[type="file"] {
+input[type='file'] {
   display: none;
-}
-
-label {
-  font-size: 24px;
 }
 
 html {
@@ -60,8 +84,23 @@ html {
 
 body {
   background: #ecf0f1;
-  padding: 16px 0 32px;
-  margin: 0;
+}
+
+body.-dragging::after {
+  text-align: center;
+  display: flex;
+  content: 'Drop your image to make a new drawing';
+  background: #fffe;
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  border: 4px dashed #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
 }
 
 *,
@@ -72,43 +111,72 @@ body {
 
 :root {
   --sizeh: calc(1080px / 2);
+  --sizew: calc(1080px / 2);
+}
+
+.inline {
+  display: flex;
+}
+
+.padding {
+  padding: 16px;
+}
+
+.label {
+  display: block;
+  height: 24px;
+  line-height: 18px;
+  background: #0008;
+  color: #fff;
+  padding: 2px 6px;
+  font-size: 14px;
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  letter-spacing: 0.5px;
 }
 
 canvas {
-  background: #fff;
-  height: var(--sizeh);
-  width: var(--sizeh);
   display: inline-block;
   vertical-align: middle;
-  margin: 16px;
 }
 
-canvas#draw {
-  width: var(--sizeh);
+canvas,
+.svg-container,
+.smooth-svg-container,
+#srcImg {
+  width: var(--sizew);
   height: var(--sizeh);
+  background: #fff;
 }
 
 #src,
-#srcimg {
+#srcImg {
   background-size: cover;
   background-position: center;
   display: inline-block;
   vertical-align: middle;
-  height: var(--sizeh);
-  width: var(--sizeh);
   display: none;
-  margin: 16px;
 }
 
-canvas,
-#src,
-#srcimg {
+#srcImg {
   max-width: calc(100vw - 32px);
   max-height: calc(100vw - 32px);
 }
 
+canvas,
 #src,
-#srcimg {
+.smooth-svg-container {
+  max-width: calc(100vw - 32px);
+  height: auto;
+}
+
+#src,
+#srcImg {
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: top;
+  background-color: transparent;
   display: inline-block;
 }
 canvas#src {
@@ -128,10 +196,9 @@ canvas#src {
   display: flex;
   align-items: center;
   margin: 8px 16px;
-  text-transform: uppercase;
 }
 
-input[type="range"] {
+input[type='range'] {
   margin-left: 12px;
   flex: 1;
   width: 180px;
@@ -141,7 +208,7 @@ input[type="range"] {
   height: 16px;
   border-radius: 0;
 }
-input[type="range"]::-webkit-slider-thumb {
+input[type='range']::-webkit-slider-thumb {
   appearance: none;
   -webkit-appearance: none;
   box-shadow: none;
@@ -151,7 +218,7 @@ input[type="range"]::-webkit-slider-thumb {
   background-color: #000;
   border: none;
 }
-input[type="range"]::-moz-range-thumb {
+input[type='range']::-moz-range-thumb {
   appearance: none;
   box-shadow: none;
   border-radius: 0;
@@ -160,26 +227,25 @@ input[type="range"]::-moz-range-thumb {
   background-color: #000;
   border: none;
 }
-input[type="range"]::-webkit-slider-runnable-track {
+input[type='range']::-webkit-slider-runnable-track {
   appearance: none;
 }
-input[type="range"]:focus {
+input[type='range']:focus {
   outline: none;
 }
-input[type="range"].toggle {
+input[type='range'].toggle {
   width: 64px;
 }
-input[type="range"].toggle::-webkit-slider-thumb {
+input[type='range'].toggle::-webkit-slider-thumb {
   width: 32px;
 }
-input[type="range"].toggle::-moz-range-thumb {
+input[type='range'].toggle::-moz-range-thumb {
   width: 32px;
 }
 
 .instructions {
   margin: 16px;
-  text-transform: uppercase;
-  line-height: 1;
+  line-height: 1.4;
   color: #7f8c8d;
 }
 
@@ -188,8 +254,9 @@ input[type="range"].toggle::-moz-range-thumb {
 }
 
 .loading {
+  padding: 10vmin;
   cursor: default;
-  font-size: 48px;
+  font-size: 1.5rem;
   letter-spacing: -1px;
   position: fixed;
   top: 0;
@@ -202,11 +269,30 @@ input[type="range"].toggle::-moz-range-thumb {
   text-align: center;
   background: #ecf0f1aa;
   color: #000;
-  text-transform: uppercase;
 }
 
-@media screen and (max-width: 1200px) {
-  #srcimg {
-    display: none;
+/*540 + 540 + 16 * 4*/
+@media screen and (max-width: 1144px) {
+  html,
+  body {
+    font-size: 20px;
   }
+  .srcimage-container {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+  }
+
+  .srcimage-container #srcImg {
+    width: max(calc(100vw - 604px), 92px);
+  }
+}
+
+.experimental--smooth-svg {
+  margin-top: 32px;
+}
+
+.experimental--smoth-svg--container {
+  display: none;
+  padding-bottom: 64px;
 }
